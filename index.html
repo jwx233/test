@@ -125,52 +125,24 @@
         const catImg = document.querySelector('.cat-gif');
         const audio = document.getElementById('audio');
         const loading = document.getElementById('loading');
+        let isClick = false;
 
-        let isTrigger = false;
-        let imgLoaded = false;
-        let timer = null;
-
-        // 统一进入主界面
-        function enterPage() {
-            if (isTrigger) return;
-            loading.style.display = 'none';
-            mask.classList.add('hide');
-            catImg.classList.add('show');
-            audio.play().catch(e => console.log('音频等待交互'));
-            setTimeout(() => {
-                mask.style.display = 'none';
-            }, 1200);
-            if(timer) clearTimeout(timer);
-        }
-
-        // 兼容已缓存图片
-        if (catImg.complete && catImg.naturalHeight > 0) {
-            imgLoaded = true;
-        }
-
-        // 图片加载完成
-        catImg.addEventListener('load', () => {
-            imgLoaded = true;
-            if(isTrigger) enterPage();
-        });
-
-        // 图片加载失败兜底
-        catImg.addEventListener('error', () => {
-            imgLoaded = true;
-            if(isTrigger) enterPage();
-        });
-
-        // 点击触发
         mask.addEventListener('click', () => {
-            if (isTrigger) return;
-            isTrigger = true;
+            // 防止重复点击
+            if (isClick) return;
+            isClick = true;
+            // 显示加载动画
             loading.style.display = 'block';
 
-            if (imgLoaded) {
-                enterPage();
-            }
-            // 3秒超时兜底，防止无限loading
-            timer = setTimeout(enterPage, 3000);
+            // 固定 1.2秒 后强制进入，彻底杜绝死循环
+            setTimeout(() => {
+                loading.style.display = 'none';
+                mask.classList.add('hide');
+                catImg.classList.add('show');
+                // 播放音乐，捕获拦截错误
+                audio.play().catch(() => {});
+                setTimeout(() => mask.style.display = 'none', 1200);
+            }, 1200);
         });
     </script>
 </body>
