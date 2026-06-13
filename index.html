@@ -54,6 +54,17 @@
             letter-spacing: 2px;
         }
 
+        /* Loading 样式 + 旋转动画 */
+        .loading {
+            width: 12vw;
+            height: 12vw;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
         .cat-gif {
             position: absolute;
             top: 50%;
@@ -67,7 +78,6 @@
 
         audio {
             display: none;
-            /* 预加载配置 */
             preload: auto;
         }
 
@@ -85,12 +95,16 @@
         @keyframes gradientFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            100% { background100% { background-position: 0% 50%; }
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-12px); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -98,24 +112,58 @@
     <div class="mask" id="mask">
         <div class="main-text">点击变身</div>
         <div class="desc-text">轻点屏幕，开启趣味时刻 ✨</div>
+        <!-- 加载动画 -->
+        <div class="loading" id="loading"></div>
     </div>
 
-    <!-- 图片默认存在，浏览器自动预加载，初始透明缩小不可见 -->
     <img class="cat-gif" src="miao.gif" alt="月薪喵">
-
-    <!-- preload="auto" 强制预加载音频，页面载入就缓存，不播放 -->
     <audio id="audio" src="yxm.MP3" loop preload="auto">
 
     <script>
         const mask = document.getElementById('mask');
         const catImg = document.querySelector('.cat-gif');
         const audio = document.getElementById('audio');
+        const loading = document.getElementById('loading');
 
+        // 标记资源是否全部加载完成
+        let resourceLoaded = false;
+        let imgLoaded = false;
+        let audioLoaded = false;
+
+        // 检查所有资源是否就绪
+        function checkAllLoaded() {
+            if (imgLoaded && audioLoaded) {
+                resourceLoaded = true;
+            }
+        }
+
+        // 监听图片加载完成
+        catImg.onload = function () {
+            imgLoaded = true;
+            checkAllLoaded();
+        };
+        // 容错：图片缓存后不走onload，手动标记
+        if (catImg.complete) {
+            imgLoaded = true;
+            checkAllLoaded();
+        }
+
+        // 监听音频加载完成
+        audio.addEventListener('canplaythrough', function () {
+            audioLoaded = true;
+            checkAllLoaded();
+        });
+
+        // 点击幕布事件
         mask.addEventListener('click', () => {
-            // 触发动画
+            // 资源未加载完成：显示loading
+            if (!resourceLoaded) {
+                loading.style.display = 'block';
+                return;
+            }
+            // 资源加载完毕：正常执行变身动画 + 播放音乐
             mask.classList.add('hide');
             catImg.classList.add('show');
-            // 点击后才开始播放音频
             audio.play();
 
             setTimeout(() => {
