@@ -116,8 +116,9 @@
         <div class="loading" id="loading"></div>
     </div>
 
-    <!-- 你的在线GIF地址 -->
+    <!-- 在线GIF 固定地址 -->
     <img class="cat-gif" src="https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6a1208acd1fd4IET.gif" alt="月薪喵">
+    <!-- 音频 仅预加载元数据，点击后播放 -->
     <audio id="audio" src="yxm.MP3" loop preload="metadata">
 
     <script>
@@ -128,41 +129,56 @@
 
         let isTrigger = false;
         let imgLoaded = false;
+        let timer = null;
 
-        // 图片已缓存直接标记完成
-        if (catImg.complete) {
-            imgLoaded = true;
-        }
-
-        // 进入主界面
+        // 统一入口：进入主界面
         function enterPage() {
+            // 防止重复执行
+            if (isTrigger) return;
             loading.style.display = 'none';
             mask.classList.add('hide');
             catImg.classList.add('show');
-            // 点击后播放音乐，捕获浏览器拦截错误
-            audio.play().catch(() => {});
-            setTimeout(() => mask.style.display = 'none', 1200);
+            // 播放音频，捕获浏览器自动播放拦截
+            audio.play().catch(e => console.log('音频等待用户交互'));
+            // 动画结束移除幕布
+            setTimeout(() => {
+                mask.style.display = 'none';
+            }, 1200);
+            // 清除兜底定时器
+            if(timer) clearTimeout(timer);
         }
 
-        // 点击触发加载
+        // 优先标记已缓存图片
+        if (catImg.complete && catImg.naturalHeight > 0) {
+            imgLoaded = true;
+        }
+
+        // 图片加载完成事件（只绑定一次）
+        catImg.addEventListener('load', () => {
+            imgLoaded = true;
+            // 已触发点击则立即进入
+            if(isTrigger) enterPage();
+        });
+
+        // 图片加载失败兜底
+        catImg.addEventListener('error', () => {
+            imgLoaded = true;
+            if(isTrigger) enterPage();
+        });
+
+        // 点击幕布事件
         mask.addEventListener('click', () => {
             if (isTrigger) return;
             isTrigger = true;
             loading.style.display = 'block';
 
-            // GIF加载完成 → 直接进入
+            // 图片已加载 → 直接进入
             if (imgLoaded) {
                 enterPage();
-            } else {
-                // 监听GIF加载完成后进入
-                catImg.onload = function() {
-                    imgLoaded = true;
-                    enterPage();
-                };
             }
 
-            // 兜底：3秒强制进入，防止网络差无限loading
-            setTimeout(enterPage, 3000);
+            // 3秒强制兜底，杜绝无限Loading
+            timer = setTimeout(enterPage, 3000);
         });
     </script>
 </body>
