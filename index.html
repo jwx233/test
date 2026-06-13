@@ -78,7 +78,6 @@
 
         audio {
             display: none;
-            preload: auto;
         }
 
         .mask.hide {
@@ -116,38 +115,46 @@
         <div class="loading" id="loading"></div>
     </div>
 
-    <img class="cat-gif" src="miao.gif" alt="月薪喵">
-    <audio id="audio" src="yxm.MP3" loop preload="auto">
+    <img class="cat-gif" id="catImg" src="miao.gif" alt="月薪喵">
+    <audio id="audio" src="yxm.MP3" loop>
 
     <script>
         const mask = document.getElementById('mask');
-        const catImg = document.querySelector('.cat-gif');
+        const catImg = document.getElementById('catImg');
         const audio = document.getElementById('audio');
         const loading = document.getElementById('loading');
-        let isClick = false;
 
-        mask.addEventListener('click', () => {
-            if (isClick) return;
-            isClick = true;
+        let done = false;
+        let timer = null;
+
+        // 执行入场动画
+        function enter() {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+
+            loading.style.display = 'none';
+            mask.classList.add('hide');
+            catImg.classList.add('show');
+            setTimeout(() => mask.style.display = 'none', 1200);
+        }
+
+        // 点击触发
+        mask.addEventListener('click', function () {
+            if (done) return;
             loading.style.display = 'block';
 
-            // 等待6秒后执行动画 + 播放音乐
-            setTimeout(() => {
-                loading.style.display = 'none';
-                mask.classList.add('hide');
-                catImg.classList.add('show');
-                
-                // 强制播放音频，捕获浏览器拦截异常
-                audio.play().catch(err => {
-                    console.log('播放受限，再次点击页面即可播放');
-                    document.body.onclick = () => {
-                        audio.play();
-                        document.body.onclick = null;
-                    }
-                });
+            // 关键：点击瞬间立刻播放音频（在用户交互上下文内，不会被拦截）
+            audio.play().catch(() => {});
 
-                setTimeout(() => mask.style.display = 'none', 1200);
-            }, 6000);
+            // 预加载图片检测，加载完立刻进入
+            const preImg = new Image();
+            preImg.src = 'miao.gif';
+            preImg.onload = enter;
+            preImg.onerror = enter;
+
+            // 6秒兜底，极端情况也不会卡死
+            timer = setTimeout(enter, 6000);
         });
     </script>
 </body>
