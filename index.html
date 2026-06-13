@@ -12,28 +12,100 @@
         body {
             width: 100vw;
             height: 100vh;
+            overflow: hidden;
+            background: #fff;
+        }
+        /* 全屏启动幕布 + 渐变背景 + 文字动画 */
+        .mask {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, #2c3e50, #4a69bd);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: #ffffff;
+            cursor: pointer;
+            transition: all 0.8s ease;
+            z-index: 999;
         }
-        img {
+        .tip-text {
+            color: #ffffff;
+            font-size: 28px;
+            letter-spacing: 4px;
+            /* 文字呼吸闪烁动画 */
+            animation: breathe 2s infinite ease-in-out;
+        }
+        .sub-text {
+            color: #dcdde1;
+            font-size: 16px;
+            margin-top: 15px;
+            opacity: 0.8;
+        }
+        /* 图片初始隐藏 + 入场动画 */
+        .cat-gif {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
             max-width: 90%;
             max-height: 90vh;
+            opacity: 0;
+            transition: all 1s cubic-bezier(0.2, 1, 0.3, 1);
         }
+        /* 音频隐藏 */
         audio {
             display: none;
+        }
+        /* 文字呼吸动画 */
+        @keyframes breathe {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        /* 幕布消失样式 */
+        .mask.hide {
+            opacity: 0;
+            transform: scale(1.2);
+            pointer-events: none;
+        }
+        /* 图片入场样式 */
+        .cat-gif.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
         }
     </style>
 </head>
 <body>
-    <img src="miao.gif" alt="月薪喵">
+    <!-- 启动幕布 -->
+    <div class="mask" id="mask">
+        <div class="tip-text">点击开启惊喜</div>
+        <div class="sub-text">👉 轻点任意位置开始</div>
+    </div>
+
+    <!-- 动图 -->
+    <img class="cat-gif" src="miao.gif" alt="月薪喵">
+
+    <!-- 音频 循环播放 -->
     <audio id="audio" src="yxm.MP3" loop>
 
     <script>
+        const mask = document.getElementById('mask');
+        const catImg = document.querySelector('.cat-gif');
         const audio = document.getElementById('audio');
-        document.addEventListener('click', () => {
+
+        mask.addEventListener('click', () => {
+            // 幕布放大淡出
+            mask.classList.add('hide');
+            // 图片缩放淡入
+            catImg.classList.add('show');
+            // 播放音乐
             audio.play();
+            // 动画结束后彻底移除幕布
+            setTimeout(() => {
+                mask.style.display = 'none';
+            }, 800);
         });
     </script>
 </body>
