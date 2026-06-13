@@ -78,6 +78,7 @@
 
         audio {
             display: none;
+            preload: auto;
         }
 
         .mask.hide {
@@ -93,7 +94,7 @@
 
         @keyframes gradientFlow {
             0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+            50% { background-position: 0% 100%; }
             100% { background-position: 0% 50%; }
         }
 
@@ -115,8 +116,10 @@
         <div class="loading" id="loading"></div>
     </div>
 
+    <!-- 页面载入自动预加载GIF -->
     <img class="cat-gif" id="catImg" src="miao.gif" alt="月薪喵">
-    <audio id="audio" src="yxm.MP3" loop>
+    <!-- 页面载入自动预加载音频，初始不播放 -->
+    <audio id="audio" src="yxm.MP3" loop preload="auto">
 
     <script>
         const mask = document.getElementById('mask');
@@ -124,37 +127,44 @@
         const audio = document.getElementById('audio');
         const loading = document.getElementById('loading');
 
-        let done = false;
+        let isDone = false;
         let timer = null;
 
-        // 执行入场动画
-        function enter() {
-            if (done) return;
-            done = true;
+        // 统一入口：进入主界面 + 播放音乐
+        function goMain() {
+            if (isDone) return;
+            isDone = true;
             clearTimeout(timer);
 
             loading.style.display = 'none';
             mask.classList.add('hide');
             catImg.classList.add('show');
-            setTimeout(() => mask.style.display = 'none', 1200);
-        }
 
-        // 点击触发
-        mask.addEventListener('click', function () {
-            if (done) return;
-            loading.style.display = 'block';
-
-            // 关键：点击瞬间立刻播放音频（在用户交互上下文内，不会被拦截）
+            // GIF加载完成后 才播放音频
             audio.play().catch(() => {});
 
-            // 预加载图片检测，加载完立刻进入
-            const preImg = new Image();
-            preImg.src = 'miao.gif';
-            preImg.onload = enter;
-            preImg.onerror = enter;
+            setTimeout(() => {
+                mask.style.display = 'none';
+            }, 1200);
+        }
 
-            // 6秒兜底，极端情况也不会卡死
-            timer = setTimeout(enter, 6000);
+        // 点击触发Loading
+        mask.addEventListener('click', () => {
+            if (isDone) return;
+            loading.style.display = 'block';
+
+            // 判定当前GIF是否已经加载完成
+            if (catImg.complete && catImg.naturalHeight > 0) {
+                goMain();
+            } else {
+                // 监听GIF加载完成
+                catImg.onload = goMain;
+                // 加载失败也正常进入
+                catImg.onerror = goMain;
+            }
+
+            // 6秒超时兜底，杜绝无限Loading
+            timer = setTimeout(goMain, 6000);
         });
     </script>
 </body>
