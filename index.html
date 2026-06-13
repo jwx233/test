@@ -78,7 +78,7 @@
 
         audio {
             display: none;
-            preload: metadata;
+            preload: auto;
         }
 
         .mask.hide {
@@ -116,9 +116,8 @@
         <div class="loading" id="loading"></div>
     </div>
 
-    <!-- 本地GIF -->
     <img class="cat-gif" src="miao.gif" alt="月薪喵">
-    <audio id="audio" src="yxm.MP3" loop preload="metadata">
+    <audio id="audio" src="yxm.MP3" loop preload="auto">
 
     <script>
         const mask = document.getElementById('mask');
@@ -132,13 +131,21 @@
             isClick = true;
             loading.style.display = 'block';
 
-            // 等待 6 秒后执行入场动画 + 播放音乐
+            // 等待6秒后执行动画 + 播放音乐
             setTimeout(() => {
                 loading.style.display = 'none';
                 mask.classList.add('hide');
                 catImg.classList.add('show');
-                audio.play().catch(() => {});
-                // 动画结束后彻底隐藏幕布
+                
+                // 强制播放音频，捕获浏览器拦截异常
+                audio.play().catch(err => {
+                    console.log('播放受限，再次点击页面即可播放');
+                    document.body.onclick = () => {
+                        audio.play();
+                        document.body.onclick = null;
+                    }
+                });
+
                 setTimeout(() => mask.style.display = 'none', 1200);
             }, 6000);
         });
