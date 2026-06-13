@@ -54,7 +54,6 @@
             letter-spacing: 2px;
         }
 
-        /* 动态环形Loading 移动端自适应 */
         .loading {
             width: 14vw;
             height: 14vw;
@@ -79,7 +78,7 @@
 
         audio {
             display: none;
-            preload: auto;
+            preload: metadata;
         }
 
         .mask.hide {
@@ -104,7 +103,6 @@
             50% { transform: translateY(-12px); }
         }
 
-        /* Loading 旋转动画 */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -118,8 +116,9 @@
         <div class="loading" id="loading"></div>
     </div>
 
-    <img class="cat-gif" src="miao.gif" alt="月薪喵">
-    <audio id="audio" src="yxm.MP3" loop preload="auto">
+    <!-- 你的在线GIF地址 -->
+    <img class="cat-gif" src="https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6a1208acd1fd4IET.gif" alt="月薪喵">
+    <audio id="audio" src="yxm.MP3" loop preload="metadata">
 
     <script>
         const mask = document.getElementById('mask');
@@ -127,50 +126,43 @@
         const audio = document.getElementById('audio');
         const loading = document.getElementById('loading');
 
+        let isTrigger = false;
         let imgLoaded = false;
-        let audioLoaded = false;
-        let isTrigger = false; // 标记是否已点击触发加载
 
-        // 资源全部就绪后 自动执行变身+播放音乐
-        function enterMain() {
-            mask.classList.add('hide');
-            catImg.classList.add('show');
-            audio.play();
-            setTimeout(() => {
-                mask.style.display = 'none';
-            }, 1200);
-        }
-
-        // 校验所有资源是否加载完成
-        function checkResource() {
-            if (imgLoaded && audioLoaded && isTrigger) {
-                loading.style.display = 'none';
-                enterMain();
-            }
-        }
-
-        // 图片加载监听（兼容缓存）
+        // 图片已缓存直接标记完成
         if (catImg.complete) {
             imgLoaded = true;
-        } else {
-            catImg.onload = () => {
-                imgLoaded = true;
-                checkResource();
-            };
         }
 
-        // 音频加载监听（可流畅播放）
-        audio.addEventListener('canplaythrough', () => {
-            audioLoaded = true;
-            checkResource();
-        });
+        // 进入主界面
+        function enterPage() {
+            loading.style.display = 'none';
+            mask.classList.add('hide');
+            catImg.classList.add('show');
+            // 点击后播放音乐，捕获浏览器拦截错误
+            audio.play().catch(() => {});
+            setTimeout(() => mask.style.display = 'none', 1200);
+        }
 
-        // 点击幕布：开启加载状态
+        // 点击触发加载
         mask.addEventListener('click', () => {
             if (isTrigger) return;
             isTrigger = true;
             loading.style.display = 'block';
-            checkResource();
+
+            // GIF加载完成 → 直接进入
+            if (imgLoaded) {
+                enterPage();
+            } else {
+                // 监听GIF加载完成后进入
+                catImg.onload = function() {
+                    imgLoaded = true;
+                    enterPage();
+                };
+            }
+
+            // 兜底：3秒强制进入，防止网络差无限loading
+            setTimeout(enterPage, 3000);
         });
     </script>
 </body>
