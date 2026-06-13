@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <!-- 移动端强制适配，禁止缩放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>月薪喵</title>
     <style>
         * {
@@ -13,81 +15,108 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background: #fff;
+            background: #ffffff;
+            -webkit-user-select: none;
+            user-select: none;
         }
-        /* 全屏启动幕布 + 渐变背景 + 文字动画 */
+
+        /* 全屏启动幕布 + 高级渐变 + 居中布局 */
         .mask {
             width: 100vw;
             height: 100vh;
             position: fixed;
             top: 0;
             left: 0;
-            background: linear-gradient(135deg, #2c3e50, #4a69bd);
+            /* 梦幻渐变背景 */
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #f6d365, #fda085);
+            background-size: 400% 400%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.8s ease;
             z-index: 999;
+            /* 背景流动动画 */
+            animation: gradientFlow 8s ease infinite;
+            transition: all 1s cubic-bezier(0.17, 0.67, 0.83, 0.67);
         }
-        .tip-text {
-            color: #ffffff;
-            font-size: 28px;
-            letter-spacing: 4px;
-            /* 文字呼吸闪烁动画 */
-            animation: breathe 2s infinite ease-in-out;
+
+        /* 主文案：点击变身 大字体+发光效果 */
+        .main-text {
+            font-size: 7vw;
+            color: #fff;
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.5);
+            /* 上下浮动动画 */
+            animation: float 2.5s ease-in-out infinite;
         }
-        .sub-text {
-            color: #dcdde1;
-            font-size: 16px;
-            margin-top: 15px;
-            opacity: 0.8;
+
+        /* 辅助提示文字 */
+        .desc-text {
+            font-size: 3.8vw;
+            color: #fff;
+            margin-top: 30px;
+            opacity: 0.9;
+            letter-spacing: 2px;
         }
-        /* 图片初始隐藏 + 入场动画 */
+
+        /* 猫咪动图：初始状态 + 华丽入场动画 */
         .cat-gif {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.8);
-            max-width: 90%;
-            max-height: 90vh;
+            max-width: 80vw;
+            max-height: 80vh;
+            /* 初始缩小+透明+旋转 */
+            transform: translate(-50%, -50%) scale(0.3) rotate(-15deg);
             opacity: 0;
-            transition: all 1s cubic-bezier(0.2, 1, 0.3, 1);
+            transition: all 1.2s cubic-bezier(0.2, 1, 0.3, 1);
         }
-        /* 音频隐藏 */
+
+        /* 隐藏音频 */
         audio {
             display: none;
         }
-        /* 文字呼吸动画 */
-        @keyframes breathe {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; }
-        }
-        /* 幕布消失样式 */
+
+        /* 幕布消失样式：向上滑出+透明 */
         .mask.hide {
             opacity: 0;
-            transform: scale(1.2);
+            transform: translateY(-100%);
             pointer-events: none;
         }
-        /* 图片入场样式 */
+
+        /* 图片变身入场样式：复位+放大+转正 */
         .cat-gif.show {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        }
+
+        /* 背景渐变流动动画 */
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 文字上下浮动动画 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
         }
     </style>
 </head>
 <body>
-    <!-- 启动幕布 -->
+    <!-- 启动幕布区域 -->
     <div class="mask" id="mask">
-        <div class="tip-text">点击开启惊喜</div>
-        <div class="sub-text">👉 轻点任意位置开始</div>
+        <div class="main-text">点击变身</div>
+        <div class="desc-text">轻点屏幕，开启趣味时刻 ✨</div>
     </div>
 
-    <!-- 动图 -->
+    <!-- 月薪喵动图 -->
     <img class="cat-gif" src="miao.gif" alt="月薪喵">
 
-    <!-- 音频 循环播放 -->
+    <!-- 循环音频 -->
     <audio id="audio" src="yxm.MP3" loop>
 
     <script>
@@ -96,16 +125,16 @@
         const audio = document.getElementById('audio');
 
         mask.addEventListener('click', () => {
-            // 幕布放大淡出
+            // 幕布向上滑走
             mask.classList.add('hide');
-            // 图片缩放淡入
+            // 猫咪变身出场
             catImg.classList.add('show');
             // 播放音乐
             audio.play();
             // 动画结束后彻底移除幕布
             setTimeout(() => {
                 mask.style.display = 'none';
-            }, 800);
+            }, 1200);
         });
     </script>
 </body>
