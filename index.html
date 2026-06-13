@@ -21,7 +21,6 @@
             max-width: 90%;
             max-height: 90vh;
         }
-        /* 隐藏音频控件 */
         audio {
             display: none;
         }
@@ -29,7 +28,13 @@
 </head>
 <body>
     <img src="miao.gif" alt="月薪喵">
-    <!-- 同目录 yxm.MP3 自动播放+无限循环 -->
-    <audio src="yxm.MP3" autoplay loop>
+    <audio id="audio" src="yxm.MP3" loop>
+
+    <script>
+        const audio = document.getElementById('audio');
+        document.addEventListener('click', () => {
+            audio.play();
+        });
+    </script>
 </body>
 </html>
