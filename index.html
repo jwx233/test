@@ -67,6 +67,7 @@
 
         audio {
             display: none;
+            /* 预加载配置 */
             preload: auto;
         }
 
@@ -99,9 +100,10 @@
         <div class="desc-text">轻点屏幕，开启趣味时刻 ✨</div>
     </div>
 
-    <!-- 替换为在线GIF地址，无需本地图片 -->
-    <img class="cat-gif" src="https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6a1208acd1fd4IET.gif" alt="月薪喵">
+    <!-- 图片默认存在，浏览器自动预加载，初始透明缩小不可见 -->
+    <img class="cat-gif" src="miao.gif" alt="月薪喵">
 
+    <!-- preload="auto" 强制预加载音频，页面载入就缓存，不播放 -->
     <audio id="audio" src="yxm.MP3" loop preload="auto">
 
     <script>
@@ -110,8 +112,10 @@
         const audio = document.getElementById('audio');
 
         mask.addEventListener('click', () => {
+            // 触发动画
             mask.classList.add('hide');
             catImg.classList.add('show');
+            // 点击后才开始播放音频
             audio.play();
 
             setTimeout(() => {
