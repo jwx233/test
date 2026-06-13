@@ -128,21 +128,19 @@
         let isClick = false;
 
         mask.addEventListener('click', () => {
-            // 防止重复点击
             if (isClick) return;
             isClick = true;
-            // 显示加载动画
             loading.style.display = 'block';
 
-            // 固定 1.2秒 后强制进入，彻底杜绝死循环
+            // 等待 6 秒后执行入场动画 + 播放音乐
             setTimeout(() => {
                 loading.style.display = 'none';
                 mask.classList.add('hide');
                 catImg.classList.add('show');
-                // 播放音乐，捕获拦截错误
                 audio.play().catch(() => {});
+                // 动画结束后彻底隐藏幕布
                 setTimeout(() => mask.style.display = 'none', 1200);
-            }, 1200);
+            }, 6000);
         });
     </script>
 </body>
