@@ -54,12 +54,13 @@
             letter-spacing: 2px;
         }
 
-        /* Loading 样式 + 旋转动画 */
+        /* 动态环形Loading 移动端自适应 */
         .loading {
-            width: 12vw;
-            height: 12vw;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
+            width: 14vw;
+            height: 14vw;
+            margin-top: 40px;
+            border: 5px solid rgba(255, 255, 255, 0.25);
+            border-top: 5px solid #ffffff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             display: none;
@@ -95,7 +96,7 @@
         @keyframes gradientFlow {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
-            100% { background100% { background-position: 0% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         @keyframes float {
@@ -103,8 +104,10 @@
             50% { transform: translateY(-12px); }
         }
 
+        /* Loading 旋转动画 */
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -112,7 +115,6 @@
     <div class="mask" id="mask">
         <div class="main-text">点击变身</div>
         <div class="desc-text">轻点屏幕，开启趣味时刻 ✨</div>
-        <!-- 加载动画 -->
         <div class="loading" id="loading"></div>
     </div>
 
@@ -125,50 +127,50 @@
         const audio = document.getElementById('audio');
         const loading = document.getElementById('loading');
 
-        // 标记资源是否全部加载完成
-        let resourceLoaded = false;
         let imgLoaded = false;
         let audioLoaded = false;
+        let isTrigger = false; // 标记是否已点击触发加载
 
-        // 检查所有资源是否就绪
-        function checkAllLoaded() {
-            if (imgLoaded && audioLoaded) {
-                resourceLoaded = true;
-            }
-        }
-
-        // 监听图片加载完成
-        catImg.onload = function () {
-            imgLoaded = true;
-            checkAllLoaded();
-        };
-        // 容错：图片缓存后不走onload，手动标记
-        if (catImg.complete) {
-            imgLoaded = true;
-            checkAllLoaded();
-        }
-
-        // 监听音频加载完成
-        audio.addEventListener('canplaythrough', function () {
-            audioLoaded = true;
-            checkAllLoaded();
-        });
-
-        // 点击幕布事件
-        mask.addEventListener('click', () => {
-            // 资源未加载完成：显示loading
-            if (!resourceLoaded) {
-                loading.style.display = 'block';
-                return;
-            }
-            // 资源加载完毕：正常执行变身动画 + 播放音乐
+        // 资源全部就绪后 自动执行变身+播放音乐
+        function enterMain() {
             mask.classList.add('hide');
             catImg.classList.add('show');
             audio.play();
-
             setTimeout(() => {
                 mask.style.display = 'none';
             }, 1200);
+        }
+
+        // 校验所有资源是否加载完成
+        function checkResource() {
+            if (imgLoaded && audioLoaded && isTrigger) {
+                loading.style.display = 'none';
+                enterMain();
+            }
+        }
+
+        // 图片加载监听（兼容缓存）
+        if (catImg.complete) {
+            imgLoaded = true;
+        } else {
+            catImg.onload = () => {
+                imgLoaded = true;
+                checkResource();
+            };
+        }
+
+        // 音频加载监听（可流畅播放）
+        audio.addEventListener('canplaythrough', () => {
+            audioLoaded = true;
+            checkResource();
+        });
+
+        // 点击幕布：开启加载状态
+        mask.addEventListener('click', () => {
+            if (isTrigger) return;
+            isTrigger = true;
+            loading.style.display = 'block';
+            checkResource();
         });
     </script>
 </body>
